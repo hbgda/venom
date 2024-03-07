@@ -36,3 +36,15 @@ macro_rules! make_hook {
         }
     };
 }
+
+#[macro_export]
+macro_rules! native_func {
+    ($ptr:expr, $fn:ident ( $($param:ty),* )) => {
+        $crate::native_func!( $ptr, $fn ($($param),*) -> () );
+    };
+    ($ptr:expr, $vis:vis $fn:ident ( $($param:ty),* ) -> $ret:ty) => {
+        $vis static $fn: $crate::Lazy<unsafe extern "system" fn( $($param),* ) -> $ret> = $crate::Lazy::new(|| unsafe {
+            std::mem::transmute::<*const (), unsafe extern "system" fn($($param),*) -> $ret>($ptr as _)
+        });
+    }
+}

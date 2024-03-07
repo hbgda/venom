@@ -1,4 +1,8 @@
 pub mod macros;
+pub mod game;
+pub mod hash;
+pub mod utils;
+pub mod patterns;
 
 pub mod windows {
     pub use windows::{
@@ -16,6 +20,10 @@ pub mod windows {
         }
     };
 }
+
+pub use {
+    once_cell::sync::Lazy
+};
 
 pub struct ModInfo {
     title: &'static str,
