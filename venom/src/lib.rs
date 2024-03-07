@@ -3,6 +3,7 @@ pub mod game;
 pub mod hash;
 pub mod utils;
 pub mod patterns;
+pub mod scaleform;
 
 pub mod windows {
     pub use windows::{
