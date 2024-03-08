@@ -22,6 +22,7 @@ pub fn hero_system_mut() -> Option<&'static mut HeroSystem> {
     )
 }
 
+#[repr(C)]
 pub struct HeroSystem {
     _0x0: [u8; 0x1C],
     hero_handle: u32

@@ -25,12 +25,8 @@ pub(crate) mod hud {
 }
 
 pub(crate) mod scaleform {
-    pub const OPEN_FILE: &'static str = "48 89 5C 24 ?? 57 48 81 EC 40 02 00 00 48 8B FA";
+    // pub const OPEN_FILE: &'static str = "48 89 5C 24 ?? 57 48 81 EC 40 02 00 00 48 8B FA";
     pub const OPEN_FILE_DISC: &'static str = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC 30 33 DB 41 8B E8";
-    
-    pub mod external_interface {
-        pub const LOBBY_MANAGER: &'static str = "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 4C 89 64 24 ?? 55 41 56 41 57 48 8D 6C 24 ?? 48 81 EC 10 01 00 00 45 8B F9";
-    }
 
     pub mod value {
         pub const CREATE_OBJECT: &'static str = "E8 ** ** ** ** 66 0F 6F 05 ?? ?? ?? ?? F3 0F 7F 45 ?? 33 F6 48 89 75 00";

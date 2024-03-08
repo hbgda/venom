@@ -50,3 +50,9 @@ pub unsafe fn scan_ref<T>(pattern: &'static str) -> Option<*const T> {
     let offset = i32::from_le_bytes(scanner.store[0..4].try_into().unwrap());
     Some((found as isize + 7 + offset as isize) as *const T)
 }
+
+pub fn terminate_string(string: &mut String) {
+    if !string.ends_with('\0') {
+        string.push('\0');
+    }
+}
