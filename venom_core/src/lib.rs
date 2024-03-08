@@ -1,5 +1,6 @@
 use std::{ffi::CStr, path::Path};
 use venom;
+use venom::config::Config;
 
 venom::make_hook!(
     HOOK_ScaleformLoader_OpenFile,
@@ -20,10 +21,18 @@ venom::make_hook!(
     }
 );
 
-static mut LOGS_ENABLED: bool = false;
+venom::make_config!(
+    MOD_INFO,
+    VenomCoreConfig {
+        logs_enabled: bool = false
+    }
+);
+
 extern fn on_change(new: bool) {
-    // TODO:
-    unsafe { LOGS_ENABLED = new };
+    // TODO: Rewrite logging so this can actually do something
+    let cfg = get_config();
+    cfg.logs_enabled = new;
+    cfg.save();
 }
 
 fn create_menu() -> venom::menu::OptionsMenu {
@@ -32,7 +41,7 @@ fn create_menu() -> venom::menu::OptionsMenu {
     menu.add_toggle(
         "Show Logs".into(), 
         Some("Show logs from venom scripts.".into()), 
-        unsafe { LOGS_ENABLED }, false, 
+        get_config().logs_enabled, false, 
         on_change
     );
 

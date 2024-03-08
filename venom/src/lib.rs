@@ -5,6 +5,7 @@ pub mod utils;
 pub mod patterns;
 pub mod scaleform;
 pub mod menu;
+pub mod config;
 
 pub mod windows {
     pub use windows::{
