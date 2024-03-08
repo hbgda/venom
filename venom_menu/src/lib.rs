@@ -20,10 +20,10 @@ fn get_priority(title: &str) -> usize {
 static mut CORE_MAP: Vec<(venom::CModInfo, extern fn() -> venom::menu::OptionsMenu)> = Vec::new();
 static mut MODS_MAP: Vec<(venom::CModInfo, extern fn() -> venom::menu::OptionsMenu)> = Vec::new();
 
-static mut VALUE_CALLBACKS_MAP: Lazy<HashMap<u32, extern fn(f64)>> = Lazy::new(HashMap::new);
-static mut BUTTON_CALLBACKS_MAP: Lazy<HashMap<u32, extern fn()>> = Lazy::new(HashMap::new); 
-static mut OPTION_COUNT: AtomicU32 = AtomicU32::new(0);
+static mut VALUE_CALLBACKS: Lazy<HashMap<u32, venom::menu::Callback>> = Lazy::new(HashMap::new);
+static mut BUTTON_CALLBACKS: Lazy<HashMap<u32, extern fn()>> = Lazy::new(HashMap::new); 
 
+static mut OPTION_COUNT: AtomicU32 = AtomicU32::new(0);
 
 #[no_mangle]
 unsafe extern "system" fn generate_id(label_ptr: *const i8) -> u32 {
@@ -57,26 +57,41 @@ unsafe extern "system" fn register_menu(mod_info: venom::CModInfo, create: exter
     MODS_MAP.push((mod_info, create));
 }
 
+// #[no_mangle]
+// unsafe extern "system" fn register_value_callback(id: u32, cb: extern fn(f64)) {
+//     VALUE_CALLBACKS_MAP.insert(id, cb);
+// }
 #[no_mangle]
-unsafe extern "system" fn register_value_callback(id: u32, cb: extern fn(f64)) {
-    VALUE_CALLBACKS_MAP.insert(id, cb);
+unsafe extern "system" fn register_f64_callback(id: u32, cb: extern fn(f64)) {
+    VALUE_CALLBACKS.insert(id, venom::menu::Callback::F64(cb));
+}
+
+#[no_mangle]
+unsafe extern "system" fn register_u32_callback(id: u32, cb: extern fn(u32)) {
+    VALUE_CALLBACKS.insert(id, venom::menu::Callback::U32(cb));
+}
+
+
+#[no_mangle] 
+unsafe extern "system" fn register_bool_callback(id: u32, cb: extern fn(bool)) {
+    VALUE_CALLBACKS.insert(id, venom::menu::Callback::Bool(cb));
 }
 
 #[no_mangle]
 unsafe extern "system" fn register_button_callback(id: u32, cb: extern fn()) {
-    BUTTON_CALLBACKS_MAP.insert(id, cb);
+    BUTTON_CALLBACKS.insert(id, cb);
 }
 
-fn emit_value_callback(id: u32, val: f64) -> bool {
-    if let Some(cb) = unsafe { &VALUE_CALLBACKS_MAP }.get(&id) {
-        cb(val);
+unsafe fn emit_value_callback(id: u32, val: f64) -> bool {
+    if let Some(cb) = VALUE_CALLBACKS.get(&id) {
+        cb.call(val);
         return true
     }
     false
 }
 
-fn emit_button_callback(id: u32) -> bool {
-    if let Some(cb) = unsafe { &BUTTON_CALLBACKS_MAP }.get(&id) {
+unsafe fn emit_button_callback(id: u32) -> bool {
+    if let Some(cb) = BUTTON_CALLBACKS.get(&id) {
         cb();
         return true
     }

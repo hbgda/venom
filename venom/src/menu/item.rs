@@ -25,8 +25,8 @@ pub trait OptionItem {
 }
 
 impl<T> From<T> for Value
-where T:
-    OptionItem + Sized 
+where
+    T: OptionItem + Sized,
 {
     fn from(value: T) -> Self {
         unsafe { value.to_value() }
@@ -36,19 +36,20 @@ where T:
 pub struct Submenu {
     pub label: String,
     pub desc: Option<String>,
-    pub menu: Box<super::OptionsMenu>
+    pub menu: Box<super::OptionsMenu>,
 }
 
 impl Submenu {
     pub fn new(mut label: String, desc: Option<String>, menu: Box<super::OptionsMenu>) -> Submenu {
         crate::utils::terminate_string(&mut label);
         let desc = match desc {
-            Some(mut str) => { crate::utils::terminate_string(&mut str); Some(str) },
-            None => None
+            Some(mut str) => {
+                crate::utils::terminate_string(&mut str);
+                Some(str)
+            }
+            None => None,
         };
-        Submenu {
-            label, desc, menu
-        }
+        Submenu { label, desc, menu }
     }
 }
 
@@ -56,7 +57,7 @@ impl OptionItem for Submenu {
     unsafe fn to_value(&self) -> Value {
         let desc = match &self.desc {
             Some(desc) => &desc,
-            None => "\0"
+            None => "\0",
         };
         let mut submenu_value = value::create_value! {
             ~item_base(0, &self.label, desc),
@@ -87,12 +88,13 @@ impl Command {
     pub fn new(id: u32, mut label: String, desc: Option<String>) -> Command {
         crate::utils::terminate_string(&mut label);
         let desc = match desc {
-            Some(mut str) => { crate::utils::terminate_string(&mut str); Some(str) },
-            None => None
+            Some(mut str) => {
+                crate::utils::terminate_string(&mut str);
+                Some(str)
+            }
+            None => None,
         };
-        Command {
-            id, label, desc
-        }
+        Command { id, label, desc }
     }
 }
 
@@ -100,7 +102,7 @@ impl OptionItem for Command {
     unsafe fn to_value(&self) -> Value {
         let desc = match &self.desc {
             Some(desc) => &desc,
-            None => "\0"
+            None => "\0",
         };
         value::create_value! {
             ~item_base(self.id, &self.label, desc),
@@ -110,7 +112,7 @@ impl OptionItem for Command {
 }
 
 pub struct Header {
-    pub label: &'static str
+    pub label: &'static str,
 }
 
 impl OptionItem for Header {
@@ -133,20 +135,30 @@ pub struct Select {
 }
 
 impl Select {
-    pub fn new(id: u32, mut label: String, desc: Option<String>, mut options: Vec<String>, selected: u32, default: u32) -> Select {
+    pub fn new(
+        id: u32,
+        mut label: String,
+        desc: Option<String>,
+        mut options: Vec<String>,
+        selected: u32,
+        default: u32,
+    ) -> Select {
         crate::utils::terminate_string(&mut label);
         let desc = match desc {
-            Some(mut str) => { crate::utils::terminate_string(&mut str); Some(str) },
-            None => None
+            Some(mut str) => {
+                crate::utils::terminate_string(&mut str);
+                Some(str)
+            }
+            None => None,
         };
         options.iter_mut().for_each(crate::utils::terminate_string);
         Select {
-            id, 
+            id,
             label,
-            desc, 
+            desc,
             options,
             selected,
-            default
+            default,
         }
     }
 }
@@ -155,7 +167,7 @@ impl OptionItem for Select {
     unsafe fn to_value(&self) -> Value {
         let desc = match &self.desc {
             Some(desc) => &desc,
-            None => "\0"
+            None => "\0",
         };
         let mut select_value = value::create_value! {
             ~item_base(self.id, &self.label, desc),
@@ -174,8 +186,8 @@ impl OptionItem for Select {
 
 pub struct Slider {
     pub id: u32,
-    pub label: &'static str,
-    pub desc: Option<&'static str>,
+    pub label: String,
+    pub desc: Option<String>,
     pub value: f64,
     pub minimum: f64,
     pub maximum: f64,
@@ -183,10 +195,44 @@ pub struct Slider {
     // pub fidelity: u32,
 }
 
+impl Slider {
+    pub fn new(
+        id: u32,
+        mut label: String,
+        desc: Option<String>,
+        value: f64,
+        minimum: f64,
+        maximum: f64,
+        default: f64,
+    ) -> Slider {
+        crate::utils::terminate_string(&mut label);
+        let desc = match desc {
+            Some(mut str) => {
+                crate::utils::terminate_string(&mut str);
+                Some(str)
+            }
+            None => None,
+        };
+        Slider {
+            id,
+            label,
+            desc,
+            value,
+            minimum,
+            maximum,
+            default  
+        }
+    }
+}
+
 impl OptionItem for Slider {
     unsafe fn to_value(&self) -> Value {
+        let desc = match &self.desc {
+            Some(desc) => &desc,
+            None => "\0",
+        };
         let slider_value = value::create_value! {
-            ~item_base(self.id, self.label, self.desc.unwrap_or("\0")),
+            ~item_base(self.id, &self.label, desc),
             "option_type": OptionType::Slider as u32,
             "value": self.value,
             "value_default": self.default,
@@ -202,14 +248,14 @@ impl OptionItem for Slider {
 pub enum ColourType {
     Normal,
     Null,
-    Custom
+    Custom,
 }
 
 pub struct ColourElement {
     pub colour_index: u32,
     pub colour_type: ColourType,
     pub colour_value: u32,
-    pub colour_name: &'static str
+    pub colour_name: &'static str,
 }
 
 pub struct Colour {
@@ -218,7 +264,7 @@ pub struct Colour {
     pub desc: Option<&'static str>,
     pub selected: u32,
     pub default: u32,
-    pub colours: Vec<ColourElement>
+    pub colours: Vec<ColourElement>,
 }
 
 impl OptionItem for Colour {
@@ -261,7 +307,7 @@ impl OptionItem for Colour {
 //     unsafe fn to_value(&self) -> Value {
 //         let mut keybind_value = value::create_value! {
 //             ~item_base(self.id, self.label, self.desc.unwrap_or("\0")),
-//             "option_type": OptionType::Keybind as u32 
+//             "option_type": OptionType::Keybind as u32
 //         };
 //         let mut binding_content = Value::create_array();
 //         binding_content.push_back(&value::create_value! {

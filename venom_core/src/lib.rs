@@ -20,22 +20,19 @@ venom::make_hook!(
     }
 );
 
-static mut LOGS_ENABLED: u32 = 0;
-fn on_change(new: f64) {
+static mut LOGS_ENABLED: bool = false;
+extern fn on_change(new: bool) {
     // TODO:
-    unsafe { LOGS_ENABLED = new as u32};
+    unsafe { LOGS_ENABLED = new };
 }
 
 fn create_menu() -> venom::menu::OptionsMenu {
     let mut menu = venom::menu::OptionsMenu::new("venom_core");
     
-    menu.add_select(
-        "Show Logs".into(),
+    menu.add_toggle(
+        "Show Logs".into(), 
         Some("Show logs from venom scripts.".into()), 
-        vec![
-            "Enabled".into(), "Disabled".into()
-        ], 
-        unsafe { LOGS_ENABLED }, 0, 
+        unsafe { LOGS_ENABLED }, false, 
         on_change
     );
 

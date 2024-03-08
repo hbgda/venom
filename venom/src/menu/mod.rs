@@ -9,6 +9,22 @@ pub fn register_menu(mod_info: &crate::ModInfo, create: fn() -> OptionsMenu) {
     external::register_menu(mod_info.into(), create)
 }
 
+pub enum Callback {
+    F64(extern fn(f64)),
+    U32(extern fn(u32)),
+    Bool(extern fn(bool))
+}
+
+impl Callback {
+    pub fn call(&self, value: f64) {
+        match self {
+            Callback::F64(cb) => cb(value),
+            Callback::U32(cb) => cb(value as u32),
+            Callback::Bool(cb) => cb(value == 1.0),
+        }
+    }
+}
+
 #[repr(C)]
 pub struct  OptionsMenu {
     header: String,
@@ -65,7 +81,7 @@ impl OptionsMenu {
         self.add_item(Box::new(Header { label }))
     }
 
-    pub fn add_button(&mut self, label: String, desc: Option<String>, on_clickled: fn()) {
+    pub fn add_button(&mut self, label: String, desc: Option<String>, on_clickled: extern fn()) {
         let id = external::generate_id(&label);
         self.add_item(Box::new(Command::new(id, label, desc)));
         external::register_button_callback(id, on_clickled);
@@ -82,31 +98,39 @@ impl OptionsMenu {
         options: Vec<String>,
         selected: u32,
         default: u32,
-        on_change: fn(f64)
+        on_change: extern fn(u32)
     ) {
         let id = external::generate_id(&label);
         self.add_item(Box::new(Select::new(
             id, label, desc, options, selected, default,
         )));
-        external::register_value_callback(id, on_change);
+        external::register_value_callback(id, Callback::U32(on_change));
+    }
+
+    pub fn add_toggle(&mut self, label: String, desc: Option<String>, value: bool, default: bool, on_change: extern fn(bool)) {
+        let id = external::generate_id(&label);
+        self.add_item(Box::new(Select::new(
+            id, label, desc, vec!["Disabled".into(), "Enabled".into()], value as u32, default as u32,
+        )));
+        external::register_value_callback(id, Callback::Bool(on_change));
     }
 
     pub fn add_slider(
         &mut self,
-        label: &'static str,
-        desc: Option<&'static str>,
+        label: String,
+        desc: Option<String>,
         value: f64,
         minimum: f64,
         maximum: f64,
         default: f64,
-        on_change: fn(f64)
+        on_change: extern fn(f64)
         // fidelity: u32,
     ) {
-        let id = external::generate_id(label);
-        self.add_item(Box::new(Slider {
+        let id = external::generate_id(&label);
+        self.add_item(Box::new(Slider::new(
             id, label, desc, value, minimum, maximum, default, // fidelity,
-        }));
-        external::register_value_callback(id, on_change)
+        )));
+        external::register_value_callback(id, Callback::F64(on_change));
     }
 
     // pub fn add_colour(&mut self, label: &'static str, desc: Option<&'static str>, colours: Vec<u32>, selected: u32, default: u32) {
