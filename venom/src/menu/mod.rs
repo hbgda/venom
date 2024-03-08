@@ -77,8 +77,8 @@ impl OptionsMenu {
         self.add_item(Box::new(Blank { } ));
     }
 
-    pub fn add_header(&mut self, label: &'static str) {
-        self.add_item(Box::new(Header { label }))
+    pub fn add_header(&mut self, label: String) {
+        self.add_item(Box::new(Header::new(label)))
     }
 
     pub fn add_button(&mut self, label: String, desc: Option<String>, on_clickled: extern fn()) {

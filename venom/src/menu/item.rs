@@ -112,13 +112,20 @@ impl OptionItem for Command {
 }
 
 pub struct Header {
-    pub label: &'static str,
+    pub label: String,
+}
+
+impl Header {
+    pub fn new(mut label: String) -> Header {
+        crate::utils::terminate_string(&mut label);
+        Header { label }
+    }
 }
 
 impl OptionItem for Header {
     unsafe fn to_value(&self) -> Value {
         value::create_value! {
-            "label": self.label,
+            "label": self.label.as_str(),
             "available": false,
             "option_type": OptionType::Header as u32
         }

@@ -119,7 +119,7 @@ unsafe fn create_mods_list() -> venom::menu::OptionsMenu {
         mods_list.add_blank();
     }
 
-    mods_list.add_header("Core\0");
+    mods_list.add_header("Core".into());
 
     // Order core modules
     CORE_MAP.sort_by(|(a, _), (b, _)| {
